@@ -4,7 +4,7 @@ import net.logicsquad.nanocaptcha.content.AbstractContentProducer;
 import rip.lunarydess.lilith.utility.StringKit;
 
 public class AlphanumericContentProducer extends AbstractContentProducer {
-    // @formatter:off
+  // @formatter:off
     private static final char[] DEFAULT_CHARS = (
             StringKit.getLowerChars() + 
             StringKit.getUpperChars() + 
@@ -12,11 +12,11 @@ public class AlphanumericContentProducer extends AbstractContentProducer {
     ).toCharArray();
     // @formatter:on
 
-    public AlphanumericContentProducer() {
-        this(7);
-    }
+  public AlphanumericContentProducer() {
+    this(7);
+  }
 
-    public AlphanumericContentProducer(final int length) {
-        super(length, DEFAULT_CHARS.clone());
-    }
+  public AlphanumericContentProducer(final int length) {
+    super(length, DEFAULT_CHARS.clone());
+  }
 }

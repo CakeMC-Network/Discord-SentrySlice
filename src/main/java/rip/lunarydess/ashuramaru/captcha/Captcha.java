@@ -2,59 +2,90 @@ package rip.lunarydess.ashuramaru.captcha;
 
 import net.logicsquad.nanocaptcha.image.ImageCaptcha;
 import net.logicsquad.nanocaptcha.image.renderer.DefaultWordRenderer;
-import rip.lunarydess.ashuramaru.Ashuramaru;
 import rip.lunarydess.ashuramaru.captcha.impl.AlphanumericContentProducer;
 import rip.lunarydess.ashuramaru.captcha.impl.MarsagliaPolarGaussianProducer;
 import rip.lunarydess.ashuramaru.captcha.impl.RealGradiatedBackgroundProducer;
 import rip.lunarydess.lilith.utility.ArrayKit;
 
 import java.awt.*;
-import java.io.FileInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class Captcha {
-    private static final Font FONT;
+  private static final Font FONT_DEFAULT;
+  private static final Font[] FONTS;
+  private static final Color[] COLORS = {
+      new Color(243, 139, 168, 255),
+      new Color(235, 160, 172, 255),
+      new Color(250, 179, 135, 255),
+      new Color(249, 226, 175, 255),
+      new Color(166, 227, 161, 255),
+      new Color(148, 226, 213, 255),
+      new Color(137, 220, 235, 255),
+      new Color(116, 199, 236, 255),
+      new Color(137, 180, 250, 255),
+      new Color(180, 190, 254, 255)
+  };
 
-    static {
-        try {
-            FONT = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(Ashuramaru.class.getResource("/typewriter.ttf").getFile())).deriveFont(Font.PLAIN, 32.0F);
-        } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
+  static {
+    Font[] fonts = initFonts().toArray(Font[]::new);
+    FONT_DEFAULT = fonts[0];
+    FONTS = ArrayKit.sliceFrom(Font[]::new, fonts, 1);
+  }
+
+  private static ArrayList<Font> initFonts() {
+    ArrayList<Font> fonts = new ArrayList<>();
+    String defaultFontName = "OCRAEXT.ttf";
+
+    try {
+      fonts.add(Font.createFont(Font.TRUETYPE_FONT, Captcha.class.getResourceAsStream("/fonts/OCRAEXT.TTF")).deriveFont(Font.PLAIN, 48.0F));
+    } catch (FontFormatException | IOException exception) {
+      throw new RuntimeException("Default-Font couldn't be loaded!", exception);
     }
 
-    private static final Color[] COLORS = {
-            /*
-            new Color(243, 139, 168, 255),
-            new Color(235, 160, 172, 255),
-            new Color(250, 179, 135, 255),
-            new Color(249, 226, 175, 255),
-            new Color(166, 227, 161, 255),
-            new Color(148, 226, 213, 255),
-            new Color(137, 220, 235, 255),
-            new Color(116, 199, 236, 255),
-            new Color(137, 180, 250, 255),
-            new Color(180, 190, 254, 255)
-            */
-            new Color(91, 206, 250, 255),
-            new Color(245, 169, 184, 255),
-            new Color(255, 255, 255, 255),
-            new Color(245, 169, 184, 255),
-            new Color(91, 206, 250, 255)
-    };
+    URL fontsFolderURL = Captcha.class.getResource("/fonts");
+    if (fontsFolderURL == null) return fonts;
 
-    public static CompletableFuture<ImageCaptcha> generate() {
-        return CompletableFuture.supplyAsync(() -> new ImageCaptcha.Builder(640, 360)
-                .addContent(new AlphanumericContentProducer(8), new DefaultWordRenderer.Builder()
-                        .xOffset(0.3 * ThreadLocalRandom.current().nextDouble())
-                        .yOffset(0.8 * ThreadLocalRandom.current().nextDouble())
-                        .randomColor(COLORS[0].darker(), ArrayKit.sliceFrom(
-                                Color[]::new, Arrays.stream(COLORS).map(Color::darker).toArray(Color[]::new), 1
-                        )).font(FONT).build())
-                .addBackground(new RealGradiatedBackgroundProducer(COLORS)).addBorder()
-                .addNoise(new MarsagliaPolarGaussianProducer(20, 4, false))
-                .build());
+    File fontsFolder = new File(fontsFolderURL.getPath());
+    if (Files.notExists(fontsFolder.toPath())) return fonts;
+
+    File[] fontsFiles = fontsFolder.listFiles(
+        (dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".ttf") &&
+            !name.toLowerCase(Locale.ROOT).equals(defaultFontName.toLowerCase(Locale.ROOT))
+    );
+    if (fontsFiles == null || fontsFiles.length == 0) return fonts;
+
+    for (File file : fontsFiles) {
+      Font font;
+      try {
+        font = Font.createFont(Font.TRUETYPE_FONT, file).deriveFont(Font.PLAIN, 48.0F);
+      } catch (FontFormatException | IOException ignored) {
+        continue;
+      }
+      if (font == null) continue;
+      fonts.add(font);
     }
+
+    return fonts;
+  }
+
+  public static CompletableFuture<ImageCaptcha> generate() {
+    return CompletableFuture.supplyAsync(() -> new ImageCaptcha.Builder(640, 360)
+        .addContent(new AlphanumericContentProducer(8), new DefaultWordRenderer.Builder()
+            .xOffset(0.7 * ThreadLocalRandom.current().nextDouble())
+            .yOffset(0.7 * ThreadLocalRandom.current().nextDouble())
+            .randomColor(COLORS[0].darker(), ArrayKit.sliceFrom(
+                Color[]::new, Arrays.stream(COLORS).map(color -> color.darker().darker()).toArray(Color[]::new), 1
+            )).randomFont(FONT_DEFAULT, FONTS).build())
+        .addBackground(new RealGradiatedBackgroundProducer(COLORS)).addBorder()
+        .addNoise(new MarsagliaPolarGaussianProducer(12, 4, false))
+        .build());
+  }
 }

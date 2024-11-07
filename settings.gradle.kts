@@ -1,1 +1,1 @@
-rootProject.name = "Discord-Ashuramaru"
+rootProject.name = "Discord-SentrySlice"

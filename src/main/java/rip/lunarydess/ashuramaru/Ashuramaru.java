@@ -6,7 +6,6 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannelBuilder;
 import org.javacord.api.entity.intent.Intent;
-import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
@@ -65,160 +64,165 @@ api.addResumeListener(event -> activityExecServ.execute(activityExec));
 activityExecServ.execute(activityExec);
  */
 public final class Ashuramaru {
-    private static final Ashuramaru INSTANCE = new Ashuramaru();
-    private final Logger logger = LoggerFactory.getLogger(Ashuramaru.class);
-    private final Configurations config = new Configurations(
-            throwable -> this.logger.error(throwable.getMessage(), throwable)
-    );
-    private DiscordApi discordApi = null;
+  private static final Ashuramaru INSTANCE = new Ashuramaru();
+  private final Logger logger = LoggerFactory.getLogger(Ashuramaru.class);
+  private final Configurations config = new Configurations(
+      throwable -> this.logger.error(throwable.getMessage(), throwable)
+  );
+  private DiscordApi discordApi = null;
 
-    public static void main(final String... args) {
-        final ImageCaptcha imageCaptcha = Captcha.generate().join();
-        final JFrame frame = new JFrame();
-        frame.setTitle("captcha test");
+  public static void main(final String... args) {
+    final ImageCaptcha imageCaptcha = Captcha.generate().join();
+    final JFrame frame = new JFrame();
+    frame.setTitle("captcha test");
 
-        final ImageIcon icon = new ImageIcon(imageCaptcha.getImage());
-        final JLabel imageLabel = new JLabel(icon);
-        frame.getContentPane().add(imageLabel, BorderLayout.CENTER);
-        frame.setVisible(true);
+    final ImageIcon icon = new ImageIcon(imageCaptcha.getImage());
+    final JLabel imageLabel = new JLabel(icon);
+    frame.getContentPane().add(imageLabel, BorderLayout.CENTER);
+    frame.setVisible(true);
 
-        final JButton generateButton = new JButton("generate");
-        generateButton.addMouseListener(new MouseAdapter() {
-            public @Override void mouseClicked(final MouseEvent event) {
-                final ImageCaptcha captcha = Captcha.generate().join();
-                icon.setImage(captcha.getImage());
-                imageLabel.updateUI();
-                System.out.println(captcha.getContent());
-            }
+    final JButton generateButton = new JButton("generate");
+    generateButton.addMouseListener(new MouseAdapter() {
+      public @Override void mouseClicked(final MouseEvent event) {
+        SwingUtilities.invokeLater(() -> {
+          final ImageCaptcha captcha = Captcha.generate().join();
+          icon.setImage(captcha.getImage());
+          imageLabel.updateUI();
+          INSTANCE.getLogger().info(captcha.getContent());
         });
-        frame.getContentPane().add(generateButton, BorderLayout.SOUTH);
+      }
+    });
+    frame.getContentPane().add(generateButton, BorderLayout.SOUTH);
+    INSTANCE.run();
+  }
 
-        System.out.println(imageCaptcha.getContent());
-        INSTANCE.run();
+  public static Ashuramaru getInstance() {
+    return INSTANCE;
+  }
+
+  /*
+   */
+
+  public void run() {
+    this.getLogger().info("""
+        
+         ___ _ _                     _          _
+        / __| (_)__ ___ _ __ _ _ ___| |_ ___ __| |_
+        \\__ \\ | / _/ -_) '_ \\ '_/ _ \\  _/ -_) _|  _|
+        |___/_|_\\__\\___| .__/_| \\___/\\__\\___\\__|\\__|
+                       |_|
+        ~ project by lunarydess and contribs ~
+                     made with \u2661
+                powered with javacord
+        """);
+    this.getConfig().load();
+
+    if (this.getConfig().data() == null) {
+      this.getLogger().error("The config data is corrupted, recheck! Shutting down...");
+      this.close();
+      return;
     }
 
-    public static Ashuramaru getInstance() {
-        return INSTANCE;
-    }
+    final Intent[] enabledIntents = CompletableFuture.supplyAsync(() -> Arrays.stream(Intent.values())
+        .filter(intent -> Arrays
+            .stream(this.getConfig().data().general().enabledIntents())
+            .anyMatch(value -> value == intent.getId()))
+        .toArray(Intent[]::new)).join();
 
-    public void run() {
-        this.getLogger().info("""
-                \n
-                          __             __                  __      \s
-                     /\\  /__` |__| |  | |__)  /\\  |\\/|  /\\  |__) |  |\s
-                    /~~\\ .__/ |  | \\__/ |  \\ /~~\\ |  | /~~\\ |  \\ \\__/\s
-                \n
-                \t~ project by lunarydess and contribs ~
-                \t             made with \u2661
-                \t        powered with javacord
-                """);
-        this.getConfig().load();
+    logger.info(String.format("Found enabled intents: %s", ArrayKit.toString(intent -> intent
+                .toString()
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("_", " "),
+            enabledIntents
+        ).replaceAll(",", ",\n\t")
+        .replaceAll("\\u005b", "\u005b\n\t ")
+        .replaceAll("\\u005d", "\n\u005d")));
 
-        if (this.getConfig().data() == null) {
-            this.getLogger().error("The config data is corrupted, recheck! Shutting down...");
-            this.close();
-            return;
-        }
-
-        final Intent[] enabledIntents = CompletableFuture.supplyAsync(() -> Arrays.stream(Intent.values())
-                .filter(intent -> Arrays
-                        .stream(this.getConfig().data().general().enabledIntents())
-                        .anyMatch(value -> value == intent.getId()))
-                .toArray(Intent[]::new)).join();
-
-        logger.info(String.format("Found enabled intents: %s", ArrayKit.toString(intent -> intent
-                                .toString()
-                                .toLowerCase(Locale.ROOT)
-                                .replaceAll("_", " "),
-                        enabledIntents
-                ).replaceAll(",", ",\n\t")
-                .replaceAll("\\u005b", "\u005b\n\t ")
-                .replaceAll("\\u005d", "\n\u005d")));
-
-        try {
-            (this.discordApi = new DiscordApiBuilder()
-                    .setToken(this.getConfig().data().general().botToken())
-                    .addIntents(enabledIntents)
-                    .setWaitForServersOnStartup(true)
-                    .setTrustAllCertificates(false)
-                    .setUserCacheEnabled(true)
-                    .login().join())
-                    .updateStatus(UserStatus.DO_NOT_DISTURB);
-        } catch (final Throwable throwable) {
-            final String headerFooter = "=".repeat(42);
-            // @formatter:off
+    try {
+      (this.discordApi = new DiscordApiBuilder()
+          .setToken(this.getConfig().data().general().botToken())
+          .addIntents(enabledIntents)
+          .setWaitForServersOnStartup(true)
+          .setTrustAllCertificates(false)
+          .setUserCacheEnabled(true)
+          .login().join())
+          .updateStatus(UserStatus.DO_NOT_DISTURB);
+    } catch (final Throwable throwable) {
+      final String headerFooter = "=".repeat(42);
+      // @formatter:off
             this.getLogger().error("""
+
                     {}
                     Couldn't connect with given token.
                     Check your internet connection + token.
                     {}""", headerFooter, headerFooter);
             // @formatter:on
-            this.close();
-            return;
+      this.close();
+      return;
+    }
+
+    final BiConsumer<ServerVoiceChannel, User> move = (channel, user) -> {
+      if (channel.getId() != 1200897374906753094L) return;
+      final ServerVoiceChannel newChannel = new ServerVoiceChannelBuilder(channel.getServer())
+          .setName(String.format("%s", user.getName()))
+          .setUserlimit(1)
+          .setBitrate(64000)
+          .setCategory(channel.getCategory().get())
+          .create().join();
+      user.move(newChannel);
+      newChannel.addServerVoiceChannelMemberLeaveListener(leaveEvent -> {
+        if (leaveEvent.getUser().getId() != user.getId()) return;
+        newChannel.delete();
+      });
+    };
+
+    this.discordApi.addServerVoiceChannelMemberJoinListener(event -> move.accept(event.getChannel(), event.getUser()));
+    CompletableFuture.runAsync(() -> {
+      for (final Server server : this.discordApi.getServers()) {
+        for (final ServerVoiceChannel channel : server.getVoiceChannels()) {
+          if (channel.getId() != 1200897374906753094L) continue;
+          for (final User user : channel.getConnectedUsers())
+            move.accept(channel, user);
+          break;
         }
+      }
+    });
 
-        final BiConsumer<ServerVoiceChannel, User> move = (channel, user) -> {
-            if (channel.getId() != 1200897374906753094L) return;
-            final ServerVoiceChannel newChannel = new ServerVoiceChannelBuilder(channel.getServer())
-                    .setName(String.format("%s", user.getName()))
-                    .setUserlimit(1)
-                    .setBitrate(64000)
-                    .setCategory(channel.getCategory().get())
-                    .create().join();
-            user.move(newChannel);
-            newChannel.addServerVoiceChannelMemberLeaveListener(leaveEvent -> {
-                if (leaveEvent.getUser().getId() != user.getId()) return;
-                newChannel.delete();
-            });
-        };
+    SlashCommand.with(
+        "ashuramaru",
+        "Navigate through here for Ashuramaru's commands."
+    ).createGlobal(this.getDiscordApi());
 
-        this.discordApi.addServerVoiceChannelMemberJoinListener(event -> move.accept(event.getChannel(), event.getUser()));
-        CompletableFuture.runAsync(() -> {
-            for (final Server server : this.discordApi.getServers()) {
-                for (final ServerVoiceChannel channel : server.getVoiceChannels()) {
-                    if (channel.getId() != 1200897374906753094L) continue;
-                    for (final User user : channel.getConnectedUsers())
-                        move.accept(channel, user);
-                    break;
-                }
-            }
-        });
+    logger.info(String.format(
+        "You can invite the bot by using the following url: %s",
+        this.getDiscordApi().createBotInvite(Permissions.fromBitmask(Intent.calculateBitmask(enabledIntents)))
+    ));
+  }
 
-        SlashCommand.with(
-                "ashuramaru",
-                "Navigate through here for Ashuramaru's commands."
-        ).createGlobal(this.getDiscordApi());
+  public void close() {
+    this.getLogger().info("saving...");
 
-        logger.info(String.format(
-                "You can invite the bot by using the following url: %s",
-                this.getDiscordApi().createBotInvite(Permissions.fromBitmask(Intent.calculateBitmask(enabledIntents)))
-        ));
-    }
+    this.getLogger().info("\t> saving config...");
+    this.getLogger().info(String.format("\t> ...%s", this.getConfig().save() ? "saved config!" : "couldn't save config!"));
 
-    public void close() {
-        this.getLogger().info("saving...");
+    this.getLogger().info("...done, cya!");
 
-        this.getLogger().info("\t> saving config...");
-        this.getLogger().info(String.format("\t> ...%s", this.getConfig().save() ? "saved config!" : "couldn't save config!"));
+    System.exit(0);
+  }
 
-        this.getLogger().info("...done, cya!");
+  public Logger getLogger() {
+    return this.logger;
+  }
 
-        System.exit(0);
-    }
+  public Configurations getConfig() {
+    return this.config;
+  }
 
-    public Logger getLogger() {
-        return this.logger;
-    }
+  public @NotNull DiscordApi getDiscordApi() {
+    return this.discordApi;
+  }
 
-    public Configurations getConfig() {
-        return this.config;
-    }
-
-    public @NotNull DiscordApi getDiscordApi() {
-        return this.discordApi;
-    }
-
-    public boolean isDebug() {
-        return true;
-    }
+  public boolean isDebug() {
+    return true;
+  }
 }
