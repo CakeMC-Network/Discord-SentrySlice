@@ -1,8 +1,8 @@
 package rip.lunarydess.ashuramaru.captcha;
 
 import net.logicsquad.nanocaptcha.image.ImageCaptcha;
-import net.logicsquad.nanocaptcha.image.renderer.DefaultWordRenderer;
 import rip.lunarydess.ashuramaru.captcha.impl.AlphanumericContentProducer;
+import rip.lunarydess.ashuramaru.captcha.impl.RandomLineWordRenderer;
 import rip.lunarydess.ashuramaru.captcha.impl.MarsagliaPolarGaussianProducer;
 import rip.lunarydess.ashuramaru.captcha.impl.RealGradiatedBackgroundProducer;
 import rip.lunarydess.lilith.utility.ArrayKit;
@@ -16,11 +16,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadLocalRandom;
 
 public final class Captcha {
-  private static final Font FONT_DEFAULT;
-  private static final Font[] FONTS;
+  public static final Font FONT_DEFAULT;
+  public static final Font[] FONTS;
   private static final Color[] COLORS = {
       new Color(243, 139, 168, 255),
       new Color(235, 160, 172, 255),
@@ -60,8 +59,7 @@ public final class Captcha {
         (dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".ttf") &&
             !name.toLowerCase(Locale.ROOT).equals(defaultFontName.toLowerCase(Locale.ROOT))
     );
-    if (fontsFiles == null || fontsFiles.length == 0) return fonts;
-
+    if (fontsFiles == null) return fonts;
     for (File file : fontsFiles) {
       Font font;
       try {
@@ -78,9 +76,7 @@ public final class Captcha {
 
   public static CompletableFuture<ImageCaptcha> generate() {
     return CompletableFuture.supplyAsync(() -> new ImageCaptcha.Builder(640, 360)
-        .addContent(new AlphanumericContentProducer(8), new DefaultWordRenderer.Builder()
-            .xOffset(0.7 * ThreadLocalRandom.current().nextDouble())
-            .yOffset(0.7 * ThreadLocalRandom.current().nextDouble())
+        .addContent(new AlphanumericContentProducer(5), new RandomLineWordRenderer.Builder()
             .randomColor(COLORS[0].darker(), ArrayKit.sliceFrom(
                 Color[]::new, Arrays.stream(COLORS).map(color -> color.darker().darker()).toArray(Color[]::new), 1
             )).randomFont(FONT_DEFAULT, FONTS).build())

@@ -63,9 +63,9 @@ api.addLostConnectionListener(event -> activityExecServ.shutdown());
 api.addResumeListener(event -> activityExecServ.execute(activityExec));
 activityExecServ.execute(activityExec);
  */
-public final class Ashuramaru {
-  private static final Ashuramaru INSTANCE = new Ashuramaru();
-  private final Logger logger = LoggerFactory.getLogger(Ashuramaru.class);
+public final class SliceProtect {
+  private static final SliceProtect INSTANCE = new SliceProtect();
+  private final Logger logger = LoggerFactory.getLogger(SliceProtect.class);
   private final Configurations config = new Configurations(
       throwable -> this.logger.error(throwable.getMessage(), throwable)
   );
@@ -96,12 +96,9 @@ public final class Ashuramaru {
     INSTANCE.run();
   }
 
-  public static Ashuramaru getInstance() {
+  public static SliceProtect getInstance() {
     return INSTANCE;
   }
-
-  /*
-   */
 
   public void run() {
     this.getLogger().info("""

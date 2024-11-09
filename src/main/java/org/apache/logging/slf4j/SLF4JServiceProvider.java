@@ -8,34 +8,34 @@ import org.tinylog.slf4j.ModernTinylogLoggerFactory;
 import org.tinylog.slf4j.TinylogMdcAdapter;
 
 public class SLF4JServiceProvider implements org.slf4j.spi.SLF4JServiceProvider {
-    public static final String REQUESTED_API_VERSION = "2.0";
+  public static final String REQUESTED_API_VERSION = "2.0";
 
-    private ILoggerFactory loggerFactory;
-    private IMarkerFactory markerFactory;
-    private MDCAdapter mdcAdapter;
+  private ILoggerFactory loggerFactory;
+  private IMarkerFactory markerFactory;
+  private MDCAdapter mdcAdapter;
 
-    public SLF4JServiceProvider() {
-    }
+  public SLF4JServiceProvider() {
+  }
 
-    public ILoggerFactory getLoggerFactory() {
-        return this.loggerFactory;
-    }
+  public ILoggerFactory getLoggerFactory() {
+    return this.loggerFactory;
+  }
 
-    public IMarkerFactory getMarkerFactory() {
-        return this.markerFactory;
-    }
+  public IMarkerFactory getMarkerFactory() {
+    return this.markerFactory;
+  }
 
-    public MDCAdapter getMDCAdapter() {
-        return this.mdcAdapter;
-    }
+  public MDCAdapter getMDCAdapter() {
+    return this.mdcAdapter;
+  }
 
-    public String getRequestedApiVersion() {
-        return REQUESTED_API_VERSION;
-    }
+  public String getRequestedApiVersion() {
+    return REQUESTED_API_VERSION;
+  }
 
-    public void initialize() {
-        this.loggerFactory = new ModernTinylogLoggerFactory();
-        this.markerFactory = new BasicMarkerFactory();
-        this.mdcAdapter = new TinylogMdcAdapter();
-    }
+  public void initialize() {
+    this.loggerFactory = new ModernTinylogLoggerFactory();
+    this.markerFactory = new BasicMarkerFactory();
+    this.mdcAdapter = new TinylogMdcAdapter();
+  }
 }

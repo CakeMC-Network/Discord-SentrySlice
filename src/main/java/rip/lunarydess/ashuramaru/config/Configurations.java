@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.toml.TomlReadFeature;
 import com.fasterxml.jackson.dataformat.toml.TomlWriteFeature;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rip.lunarydess.ashuramaru.Ashuramaru;
+import rip.lunarydess.ashuramaru.SliceProtect;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -80,7 +80,7 @@ public final class Configurations {
 
   public boolean load() {
     try {
-      Ashuramaru.getInstance()
+      SliceProtect.getInstance()
           .getLogger()
           .debug((this.data = mapper.readValue(CONFIG_PATH.toFile(), ConfigValues.class)).toString());
       if (this.data().configVersion() == CONFIG_VERSION) return true;

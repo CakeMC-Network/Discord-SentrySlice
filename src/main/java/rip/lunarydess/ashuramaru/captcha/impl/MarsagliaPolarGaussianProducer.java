@@ -17,7 +17,7 @@ public final class MarsagliaPolarGaussianProducer implements NoiseProducer {
   private static final int DEFAULT_MEAN = 0;
 
   private final int standardDeviation, mean;
-  private boolean lineEnabled;
+  private final boolean lineEnabled;
 
   // @formatter:off
     public MarsagliaPolarGaussianProducer()
