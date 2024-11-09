@@ -6,6 +6,11 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannelBuilder;
 import org.javacord.api.entity.intent.Intent;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.message.component.Button;
+import org.javacord.api.entity.message.component.*;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
@@ -156,6 +161,54 @@ public final class SliceProtect {
             // @formatter:on
       this.close();
       return;
+    }
+
+    for (Server server : this.discordApi.getServers()) {
+      if (server.getId() != 1259612520667152466L) continue;
+      var channel = server.getChannelById(1304602210973515846L).get().asTextChannel().get();
+      channel.bulkDelete(channel.getMessages(10).join().stream().mapToLong(Message::getId).toArray());
+      new MessageBuilder()
+          .setContent("Before we can proceed you have to verify that you're not a bot.")
+          .addComponents(ActionRow.of(Button.create("7331", ButtonStyle.SUCCESS, "Verify")))
+          .send(channel).thenAcceptAsync(button -> {
+            server.addModalSubmitListener(event -> {
+              String customId = event.getModalInteraction().getCustomId();
+              if (!customId.startsWith("1337;")) return;
+              var captcha = customId.substring("1337;".length());
+              var input = event.getModalInteraction().getTextInputValues().getFirst();
+              var user = event.getInteraction().getUser();
+              System.out.println(input);
+              System.out.println(captcha);
+              if (input.equalsIgnoreCase(captcha)) {
+                user.addRole(server.getRoleById(1304615618992934924L).get());
+              } else server.kickUser(user);
+            });
+            server.addButtonClickListener(event1 -> {
+              if (event1.getButtonInteractionWithCustomId("7331").isPresent()) {
+                Captcha.generate().thenAcceptAsync(captcha -> {
+                  event1.getButtonInteraction()
+                      .respondLater(true)
+                      .thenAcceptAsync(response -> {
+                        response
+                            .addComponents(ActionRow.of(Button.create("7332;" + captcha.getContent(), ButtonStyle.SUCCESS, "Let's try")))
+                            .addEmbed(new EmbedBuilder()
+                                .setTitle("Slice Captcha v1")
+                                .setDescription("Verify that you're not a bot.")
+                                .setImage(captcha.getImage())
+                                .setColor(Color.BLUE)
+                                .setAuthor(
+                                    "Slice Protect",
+                                    "https://github.com/CakeMC-Network/Discord-SliceProtect",
+                                    "https://cdn.discordapp.com/embed/avatars/0.png"
+                                )).update();
+                        // addComponents(ActionRow.of(TextInput.create(TextInputStyle.SHORT, "1337", "ID")))
+                      });
+                });
+              } else if (event1.getButtonInteraction().getCustomId().startsWith("7332;")) {
+                event1.getButtonInteraction().respondWithModal("1337;" + event1.getButtonInteraction().getCustomId().substring("7332;".length()), "Slice Captcha v1", ActionRow.of(TextInput.create(TextInputStyle.SHORT, "1337;", "ID")));
+              }
+            });
+          });
     }
 
     final BiConsumer<ServerVoiceChannel, User> move = (channel, user) -> {

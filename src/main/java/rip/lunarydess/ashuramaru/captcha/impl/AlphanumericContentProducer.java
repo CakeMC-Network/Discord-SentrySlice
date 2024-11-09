@@ -5,7 +5,7 @@ import rip.lunarydess.lilith.utility.StringKit;
 
 import java.security.SecureRandom;
 
-public class AlphanumericContentProducer extends AbstractContentProducer {
+public final class AlphanumericContentProducer extends AbstractContentProducer {
   // @formatter:off
   private static final char[] DEFAULT_CHARS = (
           StringKit.getLowerChars() +
