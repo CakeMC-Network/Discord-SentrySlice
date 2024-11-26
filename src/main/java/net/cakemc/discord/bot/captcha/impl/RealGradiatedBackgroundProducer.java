@@ -1,4 +1,4 @@
-package rip.lunarydess.ashuramaru.captcha.impl;
+package net.cakemc.discord.bot.captcha.impl;
 
 import net.logicsquad.nanocaptcha.image.backgrounds.BackgroundProducer;
 

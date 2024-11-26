@@ -104,7 +104,7 @@ dependencies {
 tasks.withType<Jar> { // @formatter:off
     manifest.attributes(mapOf(
         "Manifest-Version" to "1.0",
-        "Main-Class"       to "rip.lunarydess.ashuramaru.Ashuramaru",
+        "Main-Class"       to "net.cakemc.discord.bot.SentrySlice",
     ))
 } // @formatter:on
 

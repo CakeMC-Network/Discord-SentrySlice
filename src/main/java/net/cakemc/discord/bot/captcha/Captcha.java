@@ -1,10 +1,10 @@
-package rip.lunarydess.ashuramaru.captcha;
+package net.cakemc.discord.bot.captcha;
 
 import net.logicsquad.nanocaptcha.image.ImageCaptcha;
-import rip.lunarydess.ashuramaru.captcha.impl.AlphanumericContentProducer;
-import rip.lunarydess.ashuramaru.captcha.impl.RandomLineWordRenderer;
-import rip.lunarydess.ashuramaru.captcha.impl.MarsagliaPolarGaussianProducer;
-import rip.lunarydess.ashuramaru.captcha.impl.RealGradiatedBackgroundProducer;
+import net.cakemc.discord.bot.captcha.impl.AlphanumericContentProducer;
+import net.cakemc.discord.bot.captcha.impl.RandomLineWordRenderer;
+import net.cakemc.discord.bot.captcha.impl.MarsagliaPolarGaussianProducer;
+import net.cakemc.discord.bot.captcha.impl.RealGradiatedBackgroundProducer;
 import rip.lunarydess.lilith.utility.ArrayKit;
 
 import java.awt.*;

@@ -1,4 +1,4 @@
-package rip.lunarydess.ashuramaru.config;
+package net.cakemc.discord.bot.config;
 
 public final class ConfigThrowables {
   public static final class File {

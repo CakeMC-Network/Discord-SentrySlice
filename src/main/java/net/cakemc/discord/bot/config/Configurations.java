@@ -1,4 +1,4 @@
-package rip.lunarydess.ashuramaru.config;
+package net.cakemc.discord.bot.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.ErrorReportConfiguration;
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.toml.TomlReadFeature;
 import com.fasterxml.jackson.dataformat.toml.TomlWriteFeature;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rip.lunarydess.ashuramaru.SliceProtect;
+import net.cakemc.discord.bot.SentrySlice;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -80,7 +80,7 @@ public final class Configurations {
 
   public boolean load() {
     try {
-      SliceProtect.getInstance()
+      SentrySlice.getInstance()
           .getLogger()
           .debug((this.data = mapper.readValue(CONFIG_PATH.toFile(), ConfigValues.class)).toString());
       if (this.data().configVersion() == CONFIG_VERSION) return true;

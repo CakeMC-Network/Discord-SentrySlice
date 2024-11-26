@@ -1,4 +1,4 @@
-package rip.lunarydess.ashuramaru;
+package net.cakemc.discord.bot;
 
 import net.logicsquad.nanocaptcha.image.ImageCaptcha;
 import org.javacord.api.DiscordApi;
@@ -19,8 +19,8 @@ import org.javacord.api.interaction.SlashCommand;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rip.lunarydess.ashuramaru.captcha.Captcha;
-import rip.lunarydess.ashuramaru.config.Configurations;
+import net.cakemc.discord.bot.captcha.Captcha;
+import net.cakemc.discord.bot.config.Configurations;
 import rip.lunarydess.lilith.utility.ArrayKit;
 
 import javax.swing.*;
@@ -68,9 +68,9 @@ api.addLostConnectionListener(event -> activityExecServ.shutdown());
 api.addResumeListener(event -> activityExecServ.execute(activityExec));
 activityExecServ.execute(activityExec);
  */
-public final class SliceProtect {
-  private static final SliceProtect INSTANCE = new SliceProtect();
-  private final Logger logger = LoggerFactory.getLogger(SliceProtect.class);
+public final class SentrySlice {
+  private static final SentrySlice INSTANCE = new SentrySlice();
+  private final Logger logger = LoggerFactory.getLogger(SentrySlice.class);
   private final Configurations config = new Configurations(
       throwable -> this.logger.error(throwable.getMessage(), throwable)
   );
@@ -101,7 +101,7 @@ public final class SliceProtect {
     INSTANCE.run();
   }
 
-  public static SliceProtect getInstance() {
+  public static SentrySlice getInstance() {
     return INSTANCE;
   }
 

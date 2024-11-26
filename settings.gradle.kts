@@ -1,1 +1,1 @@
-rootProject.name = "Discord-SliceProtect"
+rootProject.name = "Discord-SentrySlice"
