@@ -15,6 +15,7 @@ group = "rip.lunarydess"
 version = "0.0.0-dev"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
 
@@ -114,8 +115,8 @@ tasks.withType<AbstractArchiveTask> {
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = JavaVersion.VERSION_21.toString()
-    targetCompatibility = JavaVersion.VERSION_21.toString()
+    sourceCompatibility = JavaVersion.VERSION_23.toString()
+    targetCompatibility = JavaVersion.VERSION_23.toString()
     options.encoding = StandardCharsets.UTF_8.toString()
 }
 
