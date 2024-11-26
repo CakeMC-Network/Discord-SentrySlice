@@ -1,0 +1,7 @@
+services:
+  java:
+    image: docker.io/openjdk:24-slim
+    container_name: openjdk24
+  bot:
+    build: .
+    container_name: discordbot
