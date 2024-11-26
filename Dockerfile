@@ -1,7 +1,6 @@
 FROM gradle:jdk23-alpine
 MAINTAINER lunarydess
-WORKDIR /app
-ADD --chown=gradle:gradle /app/sentryslice /app
+ARG JAR_FILE=build/libs/*-all.jar
 RUN ./gradlew clean build shadowJar --stacktrace
-ADD build/libs/Discord-SentrySlice-0.0.0-dev-all.jar /app/bot.jar
-ENTRYPOINT ["java","-jar","/app/bot.jar"]
+COPY ${JAR_FILE} bot.jar
+ENTRYPOINT ["java","-jar","bot.jar"]
